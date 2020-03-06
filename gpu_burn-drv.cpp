@@ -387,7 +387,11 @@ void listenClients(std::vector<int> clientFd, std::vector<pid_t> clientPid, int 
 	fd_set waitHandles;
 	
 	pid_t tempPid;
+	#ifndef __aarch64__
 	int tempHandle = pollTemp(&tempPid);
+	#else
+	int tempHandle = 50; // Dummy value for now
+	#endif
 	int maxHandle = tempHandle;
 
 	FD_ZERO(&waitHandles);
@@ -541,7 +545,9 @@ void listenClients(std::vector<int> clientFd, std::vector<pid_t> clientPid, int 
 }
 
 template<class T> void launch(int runLength, bool useDoubles) {
+#ifndef __aarch64__
 	system("nvidia-smi -L");
+#endif
 
 	// Initting A and B with random data
 	T *A = (T*) malloc(sizeof(T)*SIZE*SIZE);
@@ -617,7 +623,7 @@ template<class T> void launch(int runLength, bool useDoubles) {
 }
 
 int main(int argc, char **argv) {
-	int runLength = 10;
+	int runLength = 30;
 	bool useDoubles = false;
 	int thisParam = 0;
 	if (argc >= 2 && std::string(argv[1]) == "-d") {
@@ -625,7 +631,7 @@ int main(int argc, char **argv) {
 			thisParam++;
 		}
 	if (argc-thisParam < 2)
-		printf("Run length not specified in the command line.  Burning for 10 secs\n");
+		printf("Run length not specified in the command line.  Burning for %d secs\n", runLength);
 	else 
 		runLength = atoi(argv[1+thisParam]);
 
